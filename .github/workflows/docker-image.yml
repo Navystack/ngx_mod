@@ -1,0 +1,73 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "Nginx.php8.2.Dockerfile"
+      - "Dockerfile"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      #- name: Set up QEMU
+      #  uses: docker/setup-qemu-action@v3
+
+      #- name: Set up Docker Buildx
+      #  uses: docker/setup-buildx-action@v3
+
+      - name: Set up SSH
+        uses: MrSquaare/ssh-setup-action@v3
+        with:
+          host: ${{ secrets.SSH_HOST_NGINX }}
+          private-key: ${{ secrets.SSH_PRIVATE_KEY_NGINX }}
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          endpoint: ${{ secrets.NGINX_ENDPOINT_RUNNER }}
+          append: |
+            - endpoint: ${{ secrets.NGINX_ENDPOINT_ARM64 }}
+              platforms: linux/arm64
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker Build and Push (Nginx_PHP_8.2)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            navystack/nginx:php8.2
+            navystack/nginx:php8.29
+            navystack/php:8.2-1.25.3
+            navystack/php:latest
+          file: Nginx.php8.2.Dockerfile
+          platforms: |
+            linux/amd64
+            linux/arm64
+
+      - name: Docker Build and Push (Nginx With ngx_mod Module 1.25.3)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            navystack/ngx_mod:1.25.3
+            navystack/ngx_mod:ngx_brotli-1.25.3
+            navystack/ngx_mod:ngx_immutable-1.25.3
+            navystack/ngx_mod:ngx_cache_purge-1.25.3
+            navystack/ngx_mod:pagespeed-1.25.3
+            navystack/ngx_mod:latest
+          platforms: |
+            linux/amd64
+            linux/arm64
