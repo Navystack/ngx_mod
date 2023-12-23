@@ -53,6 +53,17 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
     tar zxvf nginx-${NGINX_VERSION}.tar.gz; \
     fi
 
+RUN if [ "$TARGETARCH" = "armv7l" ]; then \
+    wget https://gitlab.com/gusco/ngx_pagespeed_arm/-/raw/master/psol-1.15.0.0-armv7l.tar.gz && \
+    git clone --depth=1 https://github.com/apache/incubator-pagespeed-ngx.git && \
+    tar xvf psol-1.15.0.0-armv7l.tar.gz && \
+    mv psol incubator-pagespeed-ngx && \
+    sed -i 's/x86_64/armv7l/' incubator-pagespeed-ngx/config && \
+    sed -i 's/x64/armv7l/' incubator-pagespeed-ngx/config && \
+    sed -i 's/-luuid/-l:libuuid.so.1/' incubator-pagespeed-ngx/config && \
+    tar zxvf nginx-${NGINX_VERSION}.tar.gz; \
+    fi
+
 WORKDIR /opt/build-stage/nginx-${NGINX_VERSION}
 RUN ./configure --with-compat \
     --add-dynamic-module=../ngx_brotli \
