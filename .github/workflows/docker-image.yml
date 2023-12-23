@@ -56,7 +56,6 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
-            linux/arm/v7
 
       - name: Docker Build and Push (Nginx_PHP_8.2)
         uses: docker/build-push-action@v5
@@ -72,4 +71,3 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
-            linux/arm/v7
