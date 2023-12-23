@@ -53,7 +53,7 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
     tar zxvf nginx-${NGINX_VERSION}.tar.gz; \
     fi
 
-RUN if [ "$TARGETARCH" = "armv7l" ]; then \
+RUN if [ "$TARGETARCH" = "arm" ]; then \
     wget https://gitlab.com/gusco/ngx_pagespeed_arm/-/raw/master/psol-1.15.0.0-armv7l.tar.gz && \
     git clone --depth=1 https://github.com/apache/incubator-pagespeed-ngx.git && \
     tar xvf psol-1.15.0.0-armv7l.tar.gz && \
