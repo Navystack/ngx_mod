@@ -14,8 +14,6 @@ RUN curl -sSLf -o /usr/local/bin/install-php-extensions \
     chmod +x /usr/local/bin/install-php-extensions; \
         install-php-extensions gd imagick apcu opcache redis pdo_mysql mysqli intl exif zip; \
     set -eux; \
-    # set recommended PHP.ini settings
-    # see https://secure.php.net/manual/en/opcache.installation.php
 	{ \
 		echo 'opcache.memory_consumption=128'; \
 		echo 'opcache.interned_strings_buffer=8'; \
@@ -23,7 +21,6 @@ RUN curl -sSLf -o /usr/local/bin/install-php-extensions \
 		echo 'opcache.revalidate_freq=2'; \
 	} > /usr/local/etc/php/conf.d/opcache-recommended.ini; \
     { \
-    # https://www.php.net/manual/en/errorfunc.constants.php
 		echo 'error_reporting = E_ERROR | E_WARNING | E_PARSE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_RECOVERABLE_ERROR'; \
 		echo 'display_errors = Off'; \
 		echo 'display_startup_errors = Off'; \
@@ -34,12 +31,8 @@ RUN curl -sSLf -o /usr/local/bin/install-php-extensions \
 		echo 'ignore_repeated_source = Off'; \
 		echo 'html_errors = Off'; \
 	} > /usr/local/etc/php/conf.d/error-logging.ini
-
-# Nginx Dockerfile source
 # https://github.com/nginxinc/docker-nginx/blob/4bf0763f4977fff7e9648add59e0540088f3ca9f/mainline/debian/Dockerfile
-
 RUN set -x \
-# create nginx user/group first, to be consistent throughout docker variants
     && groupadd --system --gid 101 nginx \
     && useradd --system --gid nginx --no-create-home --home /nonexistent --comment "nginx user" --shell /bin/false --uid 101 nginx \
     && apt-get update \
@@ -70,24 +63,17 @@ RUN set -x \
     " \
     && case "$dpkgArch" in \
         amd64|arm64) \
-# arches officialy built by upstream
             echo "deb [signed-by=$NGINX_GPGKEY_PATH] https://nginx.org/packages/mainline/debian/ bookworm nginx" >> /etc/apt/sources.list.d/nginx.list \
             && apt-get update \
             ;; \
         *) \
-# we're on an architecture upstream doesn't officially build for
-# let's build binaries from the published source packages
             echo "deb-src [signed-by=$NGINX_GPGKEY_PATH] https://nginx.org/packages/mainline/debian/ bookworm nginx" >> /etc/apt/sources.list.d/nginx.list \
             \
-# new directory for storing sources and .deb files
             && tempDir="$(mktemp -d)" \
             && chmod 777 "$tempDir" \
-# (777 to ensure APT's "_apt" user can access it too)
             \
-# save list of currently-installed packages so build dependencies can be cleanly removed later
             && savedAptMark="$(apt-mark showmanual)" \
             \
-# build .deb files from upstream's source packages (which are verified by apt-get)
             && apt-get update \
             && apt-get build-dep -y $nginxPackages \
             && ( \
@@ -95,22 +81,14 @@ RUN set -x \
                 && DEB_BUILD_OPTIONS="nocheck parallel=$(nproc)" \
                     apt-get source --compile $nginxPackages \
             ) \
-# we don't remove APT lists here because they get re-downloaded and removed later
             \
-# reset apt-mark's "manual" list so that "purge --auto-remove" will remove all build dependencies
-# (which is done after we install the built packages so we don't have to redownload any overlapping dependencies)
             && apt-mark showmanual | xargs apt-mark auto > /dev/null \
             && { [ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; } \
             \
-# create a temporary local APT repo to install from (so that dependency resolution can be handled by APT, as it should be)
             && ls -lAFh "$tempDir" \
             && ( cd "$tempDir" && dpkg-scanpackages . > Packages ) \
             && grep '^Package: ' "$tempDir/Packages" \
             && echo "deb [ trusted=yes ] file://$tempDir ./" > /etc/apt/sources.list.d/temp.list \
-# work around the following APT issue by using "Acquire::GzipIndexes=false" (overriding "/etc/apt/apt.conf.d/docker-gzip-indexes")
-#   Could not open file /var/lib/apt/lists/partial/_tmp_tmp.ODWljpQfkE_._Packages - open (13: Permission denied)
-#   ...
-#   E: Failed to fetch store:/var/lib/apt/lists/partial/_tmp_tmp.ODWljpQfkE_._Packages  Could not open file /var/lib/apt/lists/partial/_tmp_tmp.ODWljpQfkE_._Packages - open (13: Permission denied)
             && apt-get -o Acquire::GzipIndexes=false update \
             ;; \
     esac \
@@ -121,15 +99,12 @@ RUN set -x \
                         curl \
     && apt-get remove --purge --auto-remove -y && rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/nginx.list \
     \
-# if we have leftovers from building, let's purge them (including extra, unnecessary build deps)
     && if [ -n "$tempDir" ]; then \
         apt-get purge -y --auto-remove \
         && rm -rf "$tempDir" /etc/apt/sources.list.d/temp.list; \
     fi \
-# forward request and error logs to docker log collector
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
-# create a docker-entrypoint.d directory
     && mkdir /docker-entrypoint.d \
     && mkdir /ns && \
     echo "load_module modules/ngx_http_immutable_module.so;\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf && \
