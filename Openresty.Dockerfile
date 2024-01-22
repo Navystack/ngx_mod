@@ -61,8 +61,7 @@ RUN ./configure --with-compat \
     --add-dynamic-module=../incubator-pagespeed-ngx \
     --add-dynamic-module=../ngx_immutable \
     --add-dynamic-module=../ngx_cache_purge && \
-    make && \
-    cp /opt/build-stage/openresty-${OPENRESTY_VERSION}/build/nginx-${NGINX_VERSION}/objs/*.so /usr/local/openresty/nginx/modules
+    make install
 
 FROM openresty/openresty:${OPENRESTY_DOCKER_VERSION} AS final
 COPY --from=builder /usr/local/openresty/nginx/modules /usr/local/openresty/nginx/modules
