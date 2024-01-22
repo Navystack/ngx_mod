@@ -6,6 +6,7 @@ on:
     paths:
       - "Nginx.php8.2.Dockerfile"
       - "Dockerfile"
+      - "Openresty.Dockerfile"
   workflow_dispatch:
 
 jobs:
@@ -57,17 +58,16 @@ jobs:
             linux/amd64
             linux/arm64
 
-      - name: Docker Build and Push (Nginx_PHP_8.2)
+      - name: Docker Build and Push (Openresty)
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: |
-            navystack/nginx:php8.2
-            navystack/nginx:php8.29
-            navystack/php:8.2-1.25.3
-            navystack/php:latest
-          file: Nginx.php8.2.Dockerfile
+            navystack/ngx_mod:openresty-1.25.3.1
+            navystack/ngx_mod:openresty-1.25.3
+            navystack/ngx_mod:openresty
+          file: Openresty.Dockerfile
           platforms: |
             linux/amd64
             linux/arm64
