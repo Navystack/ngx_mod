@@ -4,9 +4,7 @@ on:
   push:
     branches: ["main"]
     paths:
-      - "Nginx.php8.2.Dockerfile"
       - "Dockerfile"
-      - "Openresty.Dockerfile"
   workflow_dispatch:
 
 jobs:
@@ -28,32 +26,18 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Docker Build and Push (Nginx With ngx_mod Module 1.25.3)
+      - name: Docker Build and Push (Nginx With ngx_mod Module 1.26.0)
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: |
-            navystack/ngx_mod:1.25.3
-            navystack/ngx_mod:ngx_brotli-1.25.3
-            navystack/ngx_mod:ngx_immutable-1.25.3
-            navystack/ngx_mod:ngx_cache_purge-1.25.3
-            navystack/ngx_mod:pagespeed-1.25.3
+            navystack/ngx_mod:1.26.0
+            navystack/ngx_mod:ngx_brotli-1.26.0
+            navystack/ngx_mod:ngx_immutable-1.26.0
+            navystack/ngx_mod:ngx_cache_purge-1.26.0
+            navystack/ngx_mod:pagespeed-1.26.0
             navystack/ngx_mod:latest
-          platforms: |
-            linux/amd64
-            linux/arm64
-
-      - name: Docker Build and Push (Openresty)
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            navystack/ngx_mod:openresty-1.25.3.1
-            navystack/ngx_mod:openresty-1.25.3
-            navystack/ngx_mod:openresty
-          file: Openresty.Dockerfile
           platforms: |
             linux/amd64
             linux/arm64
