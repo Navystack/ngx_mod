@@ -1,4 +1,4 @@
-ARG NGINX_VERSION=1.25.3
+ARG NGINX_VERSION=1.26.0
 
 FROM navystack/ngx_mod:${NGINX_VERSION} as zigger-downloader
 
