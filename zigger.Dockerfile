@@ -27,7 +27,7 @@ EOF
 RUN chown -R www-data:www-data /usr/src/zigger
 RUN chmod -R 1707 /usr/src/zigger
 
-FROM rockylinux:8 as final
+FROM rockylinux:9 as final
 
 RUN dnf -y install epel-release dnf-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm && \
     dnf -y module enable php:remi-8.2 && \
