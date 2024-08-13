@@ -1,4 +1,4 @@
-FROM rockylinux:8
+FROM rockylinux:9
 
 RUN dnf -y install epel-release dnf-utils http://rpms.remirepo.net/enterprise/remi-release-8.rpm && \
     dnf -y module enable php:remi-8.2 && \
