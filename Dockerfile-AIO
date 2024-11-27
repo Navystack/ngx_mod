@@ -1,4 +1,4 @@
-ARG NGINX_VERSION=1.25.3
+ARG NGINX_VERSION=1.27.3
 FROM nginx:${NGINX_VERSION} as final
 COPY --from=navystack/ngx_mod:${NGINX_VERSION} /usr/lib/nginx/modules/*.so /usr/lib/nginx/modules/
 RUN mkdir -p /var/run/ngx_pagespeed_cache && \
