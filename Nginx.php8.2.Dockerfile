@@ -1,4 +1,4 @@
-FROM amazonlinux:2023.2.20231113.0 AS nginx-moduler
+FROM amazonlinux:2023.6.20250114.0 AS nginx-moduler
 ARG NGINX_VERSION=1.25.3
 ARG PHP_VERSION=PHP8.2.9
 ARG TARGETARCH
@@ -76,7 +76,7 @@ RUN mkdir -p /tmp/standby/nginx_modules && \
     cp /usr/lib/nginx/modules/ngx_http_cache_purge_module.so /tmp/standby/nginx_modules/ && \
     cp /usr/lib/nginx/modules/ngx_pagespeed.so /tmp/standby/nginx_modules/
 
-FROM amazonlinux:2023.2.20231113.0 AS final
+FROM amazonlinux:2023.6.20250114.0 AS final
 
 ARG NGINX_VERSION=1.25.3
 ARG PHP_VERSION=PHP8.2.9
